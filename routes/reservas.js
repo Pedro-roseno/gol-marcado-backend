@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Criar uma reserva
+
 router.post('/reservar', (req, res) => {
   const { cliente_id, horario } = req.body;
 
   console.log(` Criando reserva para Cliente ${cliente_id} no horário ${horario}`);
 
   /*
-  //  Código com erro (antes da correção) - Permitindo reservas duplicadas
   const sql = 'INSERT INTO reservas (cliente_id, horario) VALUES (?, ?)';
   db.query(sql, [cliente_id, horario], (err, result) => {
       if (err) {
@@ -19,7 +18,6 @@ router.post('/reservar', (req, res) => {
   });
   */
 
-  //  Código corrigido (impede reservas duplicadas)
   console.log(' Verificando disponibilidade do horário...');
   const checkSql = 'SELECT * FROM reservas WHERE horario = ?';
   db.query(checkSql, [horario], (err, results) => {
@@ -33,7 +31,6 @@ router.post('/reservar', (req, res) => {
       return res.status(400).json({ error: 'Horário já reservado' });
     }
 
-    // Inserir a reserva se o horário estiver disponível
     const insertSql = 'INSERT INTO reservas (cliente_id, horario) VALUES (?, ?)';
     db.query(insertSql, [cliente_id, horario], (err, result) => {
       if (err) {
@@ -46,12 +43,11 @@ router.post('/reservar', (req, res) => {
   });
 });
 
-// Rota para listar apenas horários disponíveis
+
 router.get('/horarios-disponiveis', (req, res) => {
   console.log(' Buscando horários disponíveis...');
 
   /*
-  //  Código com erro (antes da correção) - Pode gerar erro de ambiguidade no MySQL
   const sql = `
       SELECT DISTINCT horario 
       FROM horarios 
@@ -59,8 +55,6 @@ router.get('/horarios-disponiveis', (req, res) => {
       WHERE reservas.horario IS NULL
   `;
   */
-
-  //  Código corrigido (evita erro de ambiguidade no MySQL)
 
   const sql = `
         SELECT DISTINCT h.horario 
